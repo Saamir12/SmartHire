@@ -1,13 +1,31 @@
 import { Link } from "react-router";
 import Navbar from "../components/Navbar";
 
-import { PROBLEMS } from "../data/problems";
+import { useProblems } from "../hooks/useProblems";
 import { ChevronRightIcon, Code2Icon } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
 
 function ProblemsPage() {
-  const problems = Object.values(PROBLEMS);
+  const { data: problems = [], isLoading, error } = useProblems();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-error mb-2">Error Loading Problems</h2>
+          <p className="text-base-content/70">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
   const easyProblemsCount = problems.filter((p) => p.difficulty === "Easy").length;
   const mediumProblemsCount = problems.filter((p) => p.difficulty === "Medium").length;
   const hardProblemsCount = problems.filter((p) => p.difficulty === "Hard").length;

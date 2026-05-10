@@ -2,7 +2,7 @@ import { useUser } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
-import { PROBLEMS } from "../data/problems";
+import { useProblems } from "../hooks/useProblems";
 // ✅ New import
 import { executeCode } from "../lib/codeExecutor.js";
 import Navbar from "../components/Navbar";
@@ -24,6 +24,7 @@ function SessionPage() {
   const [isRunning, setIsRunning] = useState(false);
 
   const { data: sessionData, isLoading: loadingSession, refetch } = useSessionById(id);
+  const { data: problems = [] } = useProblems();
 
   const joinSessionMutation = useJoinSession();
   const endSessionMutation = useEndSession();
@@ -41,7 +42,7 @@ function SessionPage() {
 
   // find the problem data based on session problem title
   const problemData = session?.problem
-    ? Object.values(PROBLEMS).find((p) => p.title === session.problem)
+    ? problems.find((p) => p.title === session.problem)
     : null;
 
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");

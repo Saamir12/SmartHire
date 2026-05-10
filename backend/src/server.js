@@ -8,6 +8,7 @@ import { clerkMiddleware } from "@clerk/express";
 import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import codeRoutes from "./routes/codeRoutes.js";
+import problemRoutes from "./routes/problemRoutes.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(cors({
     // Allow all Vercel preview deployments for this project
     const isVercelPreview = origin && origin.match(
       /^https:\/\/smart-hire.*\.vercel\.app$/
+    
     );
 
     if (!origin || allowed.includes(origin) || isVercelPreview) {
@@ -52,6 +54,7 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/code", codeRoutes);
+app.use("/api/problems", problemRoutes);
 
 // 404 fallback — helps debug missing routes in production
 app.use((req, res) => {

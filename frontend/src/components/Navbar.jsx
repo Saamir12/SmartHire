@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { BookOpenIcon, LayoutDashboardIcon, SparklesIcon } from "lucide-react";
+import { BookOpenIcon, LayoutDashboardIcon, SparklesIcon, PlusIcon } from "lucide-react";
 import { UserButton } from "@clerk/clerk-react";
 
 function Navbar() {
@@ -30,6 +30,24 @@ function Navbar() {
         </Link>
 
         <div className="flex items-center gap-1">
+          {/* CREATE PROBLEM PAGE LINK */}
+          <Link
+            to={"/create-problem"}
+            className={`px-4 py-2.5 rounded-lg transition-all duration-200 
+              ${
+                isActive("/create-problem")
+                  ? "bg-primary text-primary-content"
+                  : "hover:bg-base-200 text-base-content/70 hover:text-base-content"
+              }
+              
+              `}
+          >
+            <div className="flex items-center gap-x-2.5">
+              <PlusIcon className="size-4" />
+              <span className="font-medium hidden sm:inline">Create</span>
+            </div>
+          </Link>
+
           {/* PROBLEMS PAGE LINK */}
           <Link
             to={"/problems"}

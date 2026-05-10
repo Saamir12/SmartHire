@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { PROBLEMS } from "../data/problems";
+import { useProblems } from "../hooks/useProblems";
 import Navbar from "../components/Navbar";
 
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -17,22 +17,29 @@ function ProblemPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const { data: problems = [], isLoading, error } = useProblems();
+
   const [currentProblemId, setCurrentProblemId] = useState("two-sum");
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
-  const [code, setCode] = useState(PROBLEMS[currentProblemId].starterCode.javascript);
+  const [code, setCode] = useState("");
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
-  const currentProblem = PROBLEMS[currentProblemId];
+  const currentProblem = problems.find((p) => p.id === currentProblemId);
 
-  // update problem when URL param changes
+  // update problem when URL param changes or data loads
   useEffect(() => {
-    if (id && PROBLEMS[id]) {
-      setCurrentProblemId(id);
-      setCode(PROBLEMS[id].starterCode[selectedLanguage]);
+    if (problems.length === 0) return;
+    
+    const targetId = id || "two-sum";
+    const targetProblem = problems.find((p) => p.id === targetId);
+    
+    if (targetProblem) {
+      setCurrentProblemId(targetId);
+      setCode(targetProblem.starterCode[selectedLanguage] || "");
       setOutput(null);
     }
-  }, [id, selectedLanguage]);
+  }, [id, selectedLanguage, problems]);
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
@@ -107,6 +114,25 @@ function ProblemPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="h-screen bg-base-100 flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (error || !currentProblem) {
+    return (
+      <div className="h-screen bg-base-100 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-error mb-2">Problem Not Found</h2>
+          <p className="text-base-content/70">Please select a valid problem.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
@@ -119,7 +145,7 @@ function ProblemPage() {
               problem={currentProblem}
               currentProblemId={currentProblemId}
               onProblemChange={handleProblemChange}
-              allProblems={Object.values(PROBLEMS)}
+              allProblems={problems}
             />
           </Panel>
 
