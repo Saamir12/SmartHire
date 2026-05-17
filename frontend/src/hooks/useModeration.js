@@ -52,14 +52,19 @@ export function useModeration(channel, isHost, isParticipant, user) {
         videoElement.style.position = "absolute";
         videoElement.style.opacity = "0";
         videoElement.style.pointerEvents = "none";
+        videoElement.muted = true;
+        videoElement.playsInline = true;
         document.body.appendChild(videoElement);
-        videoElement.play();
-
-        videoElement.onloadeddata = () => {
+        
+        try {
+          await videoElement.play();
+          console.log("[AI Moderation] Video playing, starting detection loop.");
           detectLoop(model);
-        };
+        } catch (playErr) {
+          console.error("[AI Moderation] Failed to play video:", playErr);
+        }
       } catch (err) {
-        console.error("AI Moderation failed to start:", err);
+        console.error("[AI Moderation] failed to start:", err);
       }
     };
 
@@ -78,9 +83,11 @@ export function useModeration(channel, isHost, isParticipant, user) {
           // Alert max once every 10 seconds to avoid spam
           if (now - lastAlertTime > 10000) {
             if (phones.length > 0) {
+              console.log("[AI Moderation] Phone detected!");
               emitEvent("cell_phone");
               lastAlertTime = now;
             } else if (persons.length > 1) {
+              console.log("[AI Moderation] Multiple people detected!");
               emitEvent("multiple_people");
               lastAlertTime = now;
             }
