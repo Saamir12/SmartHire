@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
 import { useProblems } from "../hooks/useProblems";
-// ✅ New import
+import { useModeration } from "../hooks/useModeration";
 import { executeCode } from "../lib/codeExecutor.js";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { getDifficultyBadgeClass } from "../lib/utils";
-import { Loader2Icon, LogOutIcon, PhoneOffIcon } from "lucide-react";
+import { Loader2Icon, LogOutIcon, PhoneOffIcon, ShareIcon } from "lucide-react";
+import toast from "react-hot-toast";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import OutputPanel from "../components/OutputPanel";
 
@@ -39,6 +40,9 @@ function SessionPage() {
     isHost,
     isParticipant
   );
+
+  // Initialize anti-cheating moderation
+  useModeration(channel, isHost, isParticipant, user);
 
   // find the problem data based on session problem title
   const problemData = session?.problem
@@ -97,6 +101,12 @@ function SessionPage() {
     }
   };
 
+  const handleShareLink = () => {
+    const url = `${window.location.origin}/session/${id}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Session link copied to clipboard!");
+  };
+
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
@@ -135,18 +145,27 @@ function SessionPage() {
                             session?.difficulty.slice(1) || "Easy"}
                         </span>
                         {isHost && session?.status === "active" && (
-                          <button
-                            onClick={handleEndSession}
-                            disabled={endSessionMutation.isPending}
-                            className="btn btn-error btn-sm gap-2"
-                          >
-                            {endSessionMutation.isPending ? (
-                              <Loader2Icon className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <LogOutIcon className="w-4 h-4" />
-                            )}
-                            End Session
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={handleShareLink}
+                              className="btn btn-secondary btn-sm gap-2"
+                            >
+                              <ShareIcon className="w-4 h-4" />
+                              Share Link
+                            </button>
+                            <button
+                              onClick={handleEndSession}
+                              disabled={endSessionMutation.isPending}
+                              className="btn btn-error btn-sm gap-2"
+                            >
+                              {endSessionMutation.isPending ? (
+                                <Loader2Icon className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <LogOutIcon className="w-4 h-4" />
+                              )}
+                              End Session
+                            </button>
+                          </div>
                         )}
                         {session?.status === "completed" && (
                           <span className="badge badge-ghost badge-lg">Completed</span>
