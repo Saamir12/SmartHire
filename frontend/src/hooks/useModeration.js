@@ -11,8 +11,7 @@ export function useModeration(channel, isHost, isParticipant, user) {
     const emitEvent = async (action) => {
       try {
         await channel.sendEvent({
-          type: "custom",
-          customType: "moderation",
+          type: "moderation_alert",
           action,
           candidateName: user?.fullName || user?.firstName || "Candidate",
         });
@@ -125,7 +124,7 @@ export function useModeration(channel, isHost, isParticipant, user) {
     if (!channel || !isHost) return;
 
     const handleCustomEvent = (event) => {
-      if (event.type === "custom" && event.customType === "moderation") {
+      if (event.type === "moderation_alert") {
         const name = event.candidateName;
         const action = event.action;
 
@@ -141,10 +140,10 @@ export function useModeration(channel, isHost, isParticipant, user) {
       }
     };
 
-    channel.on("custom", handleCustomEvent);
+    channel.on("moderation_alert", handleCustomEvent);
 
     return () => {
-      channel.off("custom", handleCustomEvent);
+      channel.off("moderation_alert", handleCustomEvent);
     };
   }, [channel, isHost]);
 }
