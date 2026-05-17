@@ -49,6 +49,10 @@ export function useModeration(channel, isHost, isParticipant, user) {
         
         videoElement = document.createElement("video");
         videoElement.srcObject = stream;
+        videoElement.style.position = "absolute";
+        videoElement.style.opacity = "0";
+        videoElement.style.pointerEvents = "none";
+        document.body.appendChild(videoElement);
         videoElement.play();
 
         videoElement.onloadeddata = () => {
@@ -64,7 +68,7 @@ export function useModeration(channel, isHost, isParticipant, user) {
       isDetecting = true;
 
       try {
-        if (videoElement.readyState >= 2) {
+        if (videoElement.readyState >= 2 && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
           const predictions = await model.detect(videoElement);
           
           const persons = predictions.filter(p => p.class === "person");
@@ -101,6 +105,9 @@ export function useModeration(channel, isHost, isParticipant, user) {
       if (videoElement) {
         videoElement.pause();
         videoElement.srcObject = null;
+        if (videoElement.parentNode) {
+          videoElement.parentNode.removeChild(videoElement);
+        }
       }
       isDetecting = false;
     };
